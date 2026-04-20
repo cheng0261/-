@@ -1,0 +1,60 @@
+.wrapper {
+  padding: 12px 8px;
+}
+
+.collapsed {
+  padding: 10px 4px;
+}
+
+.title {
+  margin: 8px 12px 12px;
+  padding: 8px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  border-radius: 8px;
+  color: rgba(255, 255, 255, 0.65);
+  text-transform: uppercase;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.menu.ant-menu-dark {
+  background: transparent;
+}
+
+.menu.ant-menu-inline .ant-menu-item,
+.menu.ant-menu-inline .ant-menu-submenu-title {
+  height: 42px;
+  line-height: 42px;
+  margin: 6px 8px;
+  border-radius: 8px;
+}
+
+.menu.ant-menu-inline .ant-menu-sub.ant-menu-inline {
+  margin: 4px 10px 8px;
+  padding: 4px 0;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.menu.ant-menu-inline .ant-menu-sub .ant-menu-item {
+  height: 36px;
+  line-height: 36px;
+  margin: 4px 8px;
+  font-size: 13px;
+}
+
+.menu .ant-menu-item .anticon,
+.menu .ant-menu-submenu-title .anticon {
+  font-size: 15px;
+}
+
+.menu .ant-menu-submenu-arrow {
+  opacity: 0.75;
+}
+
+.collapsed .menu.ant-menu-inline .ant-menu-item,
+.collapsed .menu.ant-menu-inline .ant-menu-submenu-title {
+  margin: 6px 4px;
+  border-radius: 10px;
+}

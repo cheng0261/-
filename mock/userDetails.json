@@ -1,0 +1,142 @@
+{
+  "L-1001": {
+    "id": "L-1001",
+    "name": "小李",
+    "company": "星河科技",
+    "phone": "13800001234",
+    "status": "新线索",
+    "channel": "小红书",
+    "owner": "张三",
+    "updatedAt": "2026-03-28 14:12",
+    "note": "想要 5k 左右主机，偏游戏。",
+    "email": "xiaoli@xinghe.example.com",
+    "wechat": "xiaoli_pc_01",
+    "region": "广东 · 深圳 · 南山",
+    "createdAt": "2026-03-20 10:15",
+    "intention": "游戏向台式整机，预算约 5000 元",
+    "followLogs": [
+      {
+        "at": "2026-03-28 14:12",
+        "by": "张三",
+        "content": "小红书留资，已电话确认预算与用途，待发配置单。"
+      },
+      {
+        "at": "2026-03-27 11:05",
+        "by": "系统",
+        "content": "线索自动入库，来源：小红书投放落地页。"
+      }
+    ]
+  },
+  "L-1002": {
+    "id": "L-1002",
+    "name": "阿文",
+    "company": "南山工作室",
+    "phone": "13600004321",
+    "status": "跟进中",
+    "channel": "官网",
+    "owner": "李四",
+    "updatedAt": "2026-03-30 09:40",
+    "note": "在对比 4060 vs 5060。",
+    "email": "awen@nanshan.studio",
+    "wechat": "awen_gpu",
+    "region": "广东 · 深圳",
+    "createdAt": "2026-03-22 16:30",
+    "intention": "设计 + 轻度游戏，关注显卡性价比",
+    "followLogs": [
+      {
+        "at": "2026-03-30 09:40",
+        "by": "李四",
+        "content": "官网表单咨询，已发两套方案（4060 / 5060），等待反馈。"
+      },
+      {
+        "at": "2026-03-25 15:20",
+        "by": "李四",
+        "content": "首次邮件沟通，主要用途为剪辑与偶尔游戏。"
+      }
+    ]
+  },
+  "L-1003": {
+    "id": "L-1003",
+    "name": "小周",
+    "company": "云帆传媒",
+    "phone": "13900007890",
+    "status": "已成交",
+    "channel": "转介绍",
+    "owner": "张三",
+    "updatedAt": "2026-03-26 19:05",
+    "note": "已下单，等装机。",
+    "email": "zhouyf@yunfan.media",
+    "wechat": "zhouyf_vlog",
+    "region": "上海 · 徐汇",
+    "createdAt": "2026-03-10 09:00",
+    "intention": "视频剪辑工作站，已签约采购",
+    "followLogs": [
+      {
+        "at": "2026-03-26 19:05",
+        "by": "张三",
+        "content": "合同已回签，款项到账，排期装机与上门交付。"
+      },
+      {
+        "at": "2026-03-18 14:00",
+        "by": "张三",
+        "content": "老客户介绍，现场确认机房环境与接口需求。"
+      }
+    ]
+  },
+  "L-1004": {
+    "id": "L-1004",
+    "name": "Coco",
+    "company": "拾光设计",
+    "phone": "13500001122",
+    "status": "已关闭",
+    "channel": "抖音",
+    "owner": "王五",
+    "updatedAt": "2026-03-25 11:30",
+    "note": "预算不符，暂不需要。",
+    "email": "coco@shiguang.design",
+    "wechat": "coco_sg",
+    "region": "浙江 · 杭州",
+    "createdAt": "2026-03-19 13:45",
+    "intention": "高颜值办公一体机（已放弃）",
+    "followLogs": [
+      {
+        "at": "2026-03-25 11:30",
+        "by": "王五",
+        "content": "客户表示预算上限与报价差距较大，礼貌结束跟进。"
+      },
+      {
+        "at": "2026-03-21 10:10",
+        "by": "王五",
+        "content": "抖音私信转化，偏好白色极简外观，已报价。"
+      }
+    ]
+  },
+  "L-1005": {
+    "id": "L-1005",
+    "name": "小陈",
+    "company": "极客小屋",
+    "phone": "13700006666",
+    "status": "新线索",
+    "channel": "小红书",
+    "owner": "王五",
+    "updatedAt": "2026-03-31 16:22",
+    "note": "问白色海景房方案。",
+    "email": "chen@geekcabin.example.com",
+    "wechat": "chen_white_case",
+    "region": "四川 · 成都",
+    "createdAt": "2026-03-29 20:08",
+    "intention": "白色海景房主机，RGB 与风道方案咨询",
+    "followLogs": [
+      {
+        "at": "2026-03-31 16:22",
+        "by": "王五",
+        "content": "索要海景房机箱与风扇搭配示意，已发送参考图与清单。"
+      },
+      {
+        "at": "2026-03-30 09:00",
+        "by": "系统",
+        "content": "线索来自小红书笔记评论导流。"
+      }
+    ]
+  }
+}

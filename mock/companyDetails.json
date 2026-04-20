@@ -1,0 +1,52 @@
+{
+  "星河科技": {
+    "name": "星河科技",
+    "legalName": "深圳市星河科技有限公司",
+    "industry": "互联网 / 企业服务",
+    "scale": "50–200 人",
+    "address": "深圳市南山区科技园南区某大厦 18F",
+    "website": "https://xinghe.example.com",
+    "description": "主营协同办公与轻量硬件配套，近期采购部门在评估员工用机与演示用游戏主机方案。",
+    "relatedLeadIds": ["L-1001"]
+  },
+  "南山工作室": {
+    "name": "南山工作室",
+    "legalName": "深圳南山文化创意工作室（个体工商户）",
+    "industry": "设计 / 创意",
+    "scale": "10 人以内",
+    "address": "深圳市南山区华侨城创意园",
+    "website": "",
+    "description": "小型设计团队，对个人高性能主机有明确需求，目前处于方案比选阶段。",
+    "relatedLeadIds": ["L-1002"]
+  },
+  "云帆传媒": {
+    "name": "云帆传媒",
+    "legalName": "上海云帆文化传媒有限公司",
+    "industry": "传媒 / 短视频",
+    "scale": "200–500 人",
+    "address": "上海市徐汇区漕河泾开发区",
+    "website": "https://yunfan.example.com",
+    "description": "内容生产业务量大，对剪辑工作站稳定性要求高，已通过转介绍完成本次采购闭环。",
+    "relatedLeadIds": ["L-1003"]
+  },
+  "拾光设计": {
+    "name": "拾光设计",
+    "legalName": "杭州拾光室内设计有限公司",
+    "industry": "室内设计",
+    "scale": "20–50 人",
+    "address": "杭州市西湖区文三路",
+    "website": "https://shiguang-design.example.com",
+    "description": "通过抖音了解产品，因整体预算与定位不匹配，线索已关闭。",
+    "relatedLeadIds": ["L-1004"]
+  },
+  "极客小屋": {
+    "name": "极客小屋",
+    "legalName": "成都极客小屋科技有限公司",
+    "industry": "数码零售 / 社群",
+    "scale": "50–200 人",
+    "address": "成都市高新区天府软件园",
+    "website": "https://geekcabin.example.com",
+    "description": "面向发烧友与装机爱好者，当前咨询集中在白色海景房主题装机与灯效方案。",
+    "relatedLeadIds": ["L-1005"]
+  }
+}
