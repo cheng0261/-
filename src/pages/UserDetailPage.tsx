@@ -1,5 +1,5 @@
 import { Link, useParams } from 'react-router-dom'
-import userDetails from '../../mock/userDetails.json'
+import userDetails from '@/mock/userDetails.json'
 import { Empty, Card, Tag, Timeline, Avatar, Divider, Badge } from 'antd'
 import {
   PhoneOutlined,

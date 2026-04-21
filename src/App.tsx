@@ -1,11 +1,12 @@
 import { lazy, Suspense } from 'react'
-import { BrowserRouter, Route, Routes } from 'react-router-dom'
-import { Spin } from 'antd'
-import AppLayout from '../components/layout'
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+import AppLayout from './components/layout'
+import { PageLoading } from '@/components/PageLoading'
 import { Providers } from './providers'
 import { HomePage } from './pages/HomePage'
 import { UserDetailPage } from './pages/UserDetailPage'
 import { CompanyPage } from './pages/CompanyPage'
+import { LoginRouteGuard, RequireAuth } from '@/routes/guards'
 
 const EchartsDashboardPage = lazy(async () => {
   const m = await import('./pages/EchartsDashboardPage')
@@ -17,17 +18,20 @@ export default function App() {
     <BrowserRouter>
       <Providers>
         <Routes>
-          <Route element={<AppLayout />}>
+          <Route path="/login" element={<LoginRouteGuard />} />
+          <Route
+            element={
+              <RequireAuth>
+                <AppLayout />
+              </RequireAuth>
+            }
+          >
             <Route index element={<HomePage />} />
             <Route
               path="echarts"
               element={
                 <Suspense
-                  fallback={
-                    <div className="flex min-h-[40vh] items-center justify-center p-8">
-                      <Spin size="large" tip="加载图表模块…" />
-                    </div>
-                  }
+                  fallback={<PageLoading tip="加载图表模块…" />}
                 >
                   <EchartsDashboardPage />
                 </Suspense>
@@ -36,6 +40,7 @@ export default function App() {
             <Route path="users/:userId" element={<UserDetailPage />} />
             <Route path="companies/:companyName" element={<CompanyPage />} />
           </Route>
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Providers>
     </BrowserRouter>

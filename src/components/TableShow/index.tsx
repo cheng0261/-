@@ -4,7 +4,7 @@ import { Flex, Space, Table, Tag } from 'antd'
 import ViewModal from './ViewModal'
 import EditModal from './EditModal'
 import DeleteModal from './DeleteModal'
-import type { DataItem } from '../../types'
+import type { DataItem } from '@/types'
 import type { TableProps } from 'antd'
 
 interface TableShowProps {

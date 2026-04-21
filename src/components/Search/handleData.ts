@@ -1,5 +1,5 @@
 // 数据过滤
-import type { DataItem } from '../../types'
+import type { DataItem } from '@/types'
 
 export interface FilterValues {
     status: string

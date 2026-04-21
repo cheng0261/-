@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Button, Modal } from 'antd';
 import type { ButtonProps } from 'antd';
-import type { DataItem } from '../../types'
+import type { DataItem } from '@/types'
 
 interface ViewModalProps {
   item: DataItem

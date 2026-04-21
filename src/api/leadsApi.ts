@@ -1,8 +1,8 @@
-import type { DataItem } from '../../types'
-import type { FilterValues } from '../../components/Search/handleData'
-import handleData from '../../components/Search/handleData'
-import getRandomAvatar from '../../components/Search/getRandomAvatar'
-import raw from '../../mock/data.json'
+import type { DataItem } from '@/types'
+import type { FilterValues } from '@/components/Search/handleData'
+import handleData from '@/components/Search/handleData'
+import getRandomAvatar from '@/components/Search/getRandomAvatar'
+import raw from '@/mock/data.json'
 
 function delay(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms))

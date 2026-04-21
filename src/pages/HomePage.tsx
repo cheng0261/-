@@ -1,6 +1,6 @@
 import { Card } from 'antd'
-import { Header } from '../../components/Header'
-import { Search } from '../../components/Search'
+import { Header } from '@/components/Header'
+import { Search } from '@/components/Search'
 import { CommonValueProvider, useCommonValueHook } from '@/context/home-context'
 
 export function HomePage() {

@@ -1,13 +1,12 @@
 import { useEffect, useMemo, useState, useCallback } from 'react'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useContextValueHook } from '@/context/home-context'
 import { useDebouncedValue } from '@/hooks/useDebouncedValue'
 import { fetchLeads, removeLead, updateLeadNote } from '@/api/leadsApi'
 
-import options from '../../mock/options.json'
+import options from '@/mock/options.json'
 import TableShow from '../TableShow'
 import { Select, Button, Flex, Pagination } from 'antd'
-import type { DataItem } from '../../types'
+import type { DataItem } from '@/types'
 import type { FilterValues } from './handleData'
 
 interface OptionItem {
@@ -17,11 +16,10 @@ interface OptionItem {
 }
 
 const PAGE_SIZE = 40
+const LEADS_CHANGED_EVENT = 'leads-changed'
 
 export const Search = () => {
   const { filters, handleFilters, handleResetFilters, handleDataCount } = useContextValueHook()
-  const queryClient = useQueryClient()
-
   const debouncedKeyword = useDebouncedValue(filters.keyword, 350)
   const apiFilters: FilterValues = useMemo(
     () => ({
@@ -34,48 +32,50 @@ export const Search = () => {
   )
 
   const [page, setPage] = useState(1)
+  const [loading, setLoading] = useState(false)
+  const [items, setItems] = useState<DataItem[]>([])
+  const [total, setTotal] = useState(0)
 
   // 头部搜索框防抖后的关键字变化时回到第一页
-  /* eslint-disable react-hooks/set-state-in-effect -- 与 debounce 同步，避免当前页超出筛选结果 */
   useEffect(() => {
     setPage(1)
   }, [debouncedKeyword])
-  /* eslint-enable react-hooks/set-state-in-effect */
 
-  const { data, isFetching } = useQuery({
-    queryKey: ['leads', apiFilters, page, PAGE_SIZE] as const,
-    queryFn: () => fetchLeads({ filters: apiFilters, page, pageSize: PAGE_SIZE }),
-  })
+  const loadLeads = useCallback(async () => {
+    setLoading(true)
+    try {
+      const result = await fetchLeads({ filters: apiFilters, page, pageSize: PAGE_SIZE })
+      setItems(result.items)
+      setTotal(result.total)
+    } finally {
+      setLoading(false)
+    }
+  }, [apiFilters, page])
 
   useEffect(() => {
-    handleDataCount(data?.total ?? 0)
-  }, [data?.total, handleDataCount])
+    void loadLeads()
+  }, [loadLeads])
 
-  const editMutation = useMutation({
-    mutationFn: ({ id, note }: { id: string; note: string }) => updateLeadNote(id, note),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['leads'] }),
-  })
-
-  const deleteMutation = useMutation({
-    mutationFn: (item: DataItem) => removeLead(item.id),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['leads'] })
-      void queryClient.invalidateQueries({ queryKey: ['leads-chart-data'] })
-    },
-  })
+  useEffect(() => {
+    handleDataCount(total)
+  }, [total, handleDataCount])
 
   const handleEdit = useCallback(
-    (id: string, content: string) => {
-      editMutation.mutate({ id, note: content })
+    async (id: string, content: string) => {
+      await updateLeadNote(id, content)
+      await loadLeads()
+      window.dispatchEvent(new Event(LEADS_CHANGED_EVENT))
     },
-    [editMutation],
+    [loadLeads],
   )
 
   const handleDelete = useCallback(
-    (item: DataItem) => {
-      deleteMutation.mutate(item)
+    async (item: DataItem) => {
+      await removeLead(item.id)
+      await loadLeads()
+      window.dispatchEvent(new Event(LEADS_CHANGED_EVENT))
     },
-    [deleteMutation],
+    [loadLeads],
   )
 
   const optionItems = useMemo(() => options as OptionItem[], [])
@@ -86,9 +86,6 @@ export const Search = () => {
       selectOptions: option.options.map((value) => ({ value, label: value })),
     }))
   }, [optionItems])
-
-  const paginatedData = data?.items ?? []
-  const total = data?.total ?? 0
 
   return (
     <div>
@@ -118,8 +115,8 @@ export const Search = () => {
         </Button>
       </Flex>
       <TableShow
-        data={paginatedData}
-        loading={isFetching}
+        data={items}
+        loading={loading}
         handleEdit={handleEdit}
         handleDelete={handleDelete}
       />

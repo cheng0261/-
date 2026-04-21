@@ -1,5 +1,5 @@
 import { useParams } from 'react-router-dom'
-import companyDetails from '../../mock/companyDetails.json'
+import companyDetails from '@/mock/companyDetails.json'
 import { Empty, Descriptions } from 'antd'
 
 interface CompanyInfo {

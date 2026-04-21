@@ -1,7 +1,7 @@
 // import React, { useState } from 'react';
 import { Button, Popconfirm } from 'antd';
 import type { ButtonProps } from 'antd';
-import type { DataItem } from '../../types';
+import type { DataItem } from '@/types';
 
 interface DeleteModalProps {
   item: DataItem

@@ -1,20 +1,28 @@
-import { useEffect, useRef } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import * as echarts from 'echarts'
 import { Card, Row, Col, Statistic } from 'antd'
 import { RiseOutlined, GroupOutlined, AimOutlined, ClockCircleOutlined } from '@ant-design/icons'
 import { getLeadsSnapshot } from '@/api/leadsApi'
+
+const LEADS_CHANGED_EVENT = 'leads-changed'
 
 export function EchartsDashboardPage() {
   const barChartRef = useRef<HTMLDivElement>(null)
   const pieChartRef = useRef<HTMLDivElement>(null)
   const lineChartRef = useRef<HTMLDivElement>(null)
   const radarChartRef = useRef<HTMLDivElement>(null)
+  const [chartData, setChartData] = useState(() => getLeadsSnapshot())
 
-  const { data: chartData = [] } = useQuery({
-    queryKey: ['leads-chart-data'],
-    queryFn: () => Promise.resolve(getLeadsSnapshot()),
-  })
+  const refreshChartData = useCallback(() => {
+    setChartData(getLeadsSnapshot())
+  }, [])
+
+  useEffect(() => {
+    window.addEventListener(LEADS_CHANGED_EVENT, refreshChartData)
+    return () => {
+      window.removeEventListener(LEADS_CHANGED_EVENT, refreshChartData)
+    }
+  }, [refreshChartData])
 
   useEffect(() => {
     const barChart = echarts.init(barChartRef.current)

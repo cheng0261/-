@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Button, Modal, Input } from 'antd';
 import type { ButtonProps } from 'antd';
 const { TextArea } = Input;
-import type { DataItem } from '../../types';
+import type { DataItem } from '@/types';
 
 // 编辑 弹窗组件
 interface EditModalProps {
