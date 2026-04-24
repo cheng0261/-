@@ -16,6 +16,7 @@ export function LoginPage() {
   const [submitting, setSubmitting] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
 
+  // 从路由 state 里拿到被守卫重定向前的目标地址（比如你本来访问 /echarts，被拦到 /login）。取不到就默认回首页 /
   const fromPath = (location.state as { from?: { pathname?: string } } | null)?.from?.pathname ?? '/'
 
   const onSubmit = async (values: LoginFormValues) => {

@@ -1,200 +1,74 @@
-# 线索管理系统（React + TypeScript）
+## 双 Token 刷新与并发请求处理
+**题目**：你在简历中提到使用了“双 Token 策略（Access + Refresh Token）实现完整认证流程”。请具体说明：当 Access Token 过期时，前端如何利用 Refresh Token 静默刷新 Token？如果在刷新 Token 的同时，页面中还有其他多个接口请求正在等待，你如何避免这些请求因为 Token 过期而失败，或者避免多次调用刷新 Token 的接口？
+**问题1**：Access Token 过期，如何利用 Refresh Token 静默刷新？
 
-基于 **Vite 7** 与 **React 19** 的前端演示项目：Mock 登录、线索列表（筛选 / 搜索 / 分页 / 编辑 / 删除）、ECharts 看板，以及用户与企业详情页。业务数据在内存中模拟持久化，刷新页面会重置。
+**回答**：在我的项目中，
 
-适合作为 **React 基础教学** 参考：以 `useState`、`useEffect`、Context 与独立 `api` 模块组织代码，避免过度抽象。
+应用启动时，AuthProvider（用于管理用户认证状态的上下文提供者。） 会先从 localStorage 读取 accessToken 和 refreshToken。如果 accessToken 存在，会主动（调用 meApi 去后端）验证这个 Token 是否有效。
 
----
+如果 meApi 因为 Token 过期或无效失败，我们会（进入 catch 分支检查）是否有 refreshToken。如果有，就调用 refreshApi 获取新的 accessToken（和refreshToken）。然后用新 Token 再次调用 meApi 获取用户信息，完成登录恢复。
 
-## 功能一览
+如果 refreshToken 也不存在或刷新失败，就清空状态，让用户回到登录页。
 
-| 能力 | 说明 |
-|------|------|
-| 登录 | Mock Token（access / refresh），启动时尝试恢复会话 |
-| 路由守卫 | 未登录跳转 `/login`，已登录访问登录页则回首页 |
-| 线索列表 | 多条件筛选、关键字防抖、分页、表格内编辑备注与删除 |
-| 图表看板 | 与列表共用同一份内存数据；列表变更后通过事件刷新图表 |
-| 详情页 | 用户 / 企业详情由 `src/mock` 下 JSON 字典驱动 |
+这样做的好处是：*不信任客户端存储的任何 Token*，每次都让后端验证身份，既安全又能在 refreshToken 有效时实现无感知恢复。
 
-**演示账号**：`admin` / `123456`（见登录页与 `authApi` 中的 Mock 逻辑）。
+[*不信任客户端存储的任何 Token*]:
+因为客户端存储是完全暴露给用户的，用户或恶意脚本都可以随意读写。如果前端只判断 localStorage 里有没有 Token 就认为用户已登录，攻击者可以通过 XSS 注入一段代码，往 localStorage 里写入一个假 Token，然后刷新页面，前端就会显示‘已登录’状态，虽然实际 API 请求都会失败，但界面状态已经错乱了。
 
----
+更严重的是，如果这个假 Token 的格式恰好和后端期望的格式一致，后端没有做严格的签名校验，甚至可能造成越权访问。
 
-## 技术栈
+所以正确的做法是：前端只负责存储和携带 Token，但从不‘信任’它。每次需要确定用户身份时，都必须把 Token 交给后端验证，后端说了算。这就是为什么我们在启动时要主动调用 meApi——让后端告诉我们这个 Token 到底还有没有效。
 
-| 类别 | 依赖 |
-|------|------|
-| 运行时 | React 19、React DOM 19 |
-| 构建 | Vite 7、`@vitejs/plugin-react` |
-| 语言 | TypeScript 5.9 |
-| UI | Ant Design 6、`@ant-design/icons` |
-| 路由 | React Router 7 |
-| 图表 | ECharts 6（图表页 `lazy` 懒加载） |
-| 样式 | 根目录 `index.css` + Tailwind CSS 4（`@tailwindcss/vite`） |
+[*为什么用双token，一个不行吗*]：
+为了在“安全性”和“用户体验”之间找到平衡。
 
----
+如果只用一个token，比如
+只用短期token（比如 15 分钟）
+- 优点：非常安全，即使泄露也很快失效。
+- 缺点：用户体验极差，需要每 15 分钟就让用户重新登录一次（或者非常复杂的前端存储密码自动登录）
 
-## 环境要求
+只用长期 Token（比如 7 天）
+- 优点：用户体验好，一次登录能管很久。
+- 缺点：风险极高。Token 一旦被 XSS 攻击窃取，攻击者在 7 天内都可以冒充用户为所欲为。
 
-- **Node.js**：建议 20 LTS 及以上  
-- **包管理**：`pnpm`、`npm` 或 `yarn` 均可（下文以 `pnpm` 为例）
+[*你把 Refresh Token 也放 localStorage，那和只用一个长期 Token 有什么区别？*]:
+这确实不是最安全的方式。但相比只用一个长期 Token，它仍然有优势:
+- 攻击窗口缩小：Access Token 只有 15 分钟有效期。攻击者即使通过 XSS 窃取到了 Token，他只有 15 分钟的时间窗口来冒充用户。
+- Refresh Token 轮换：每次刷新时，后端会颁发新的 Refresh Token，旧的立即失效。这可以降低持续泄露的风险。
+如果未来安全要求更高，我会把 Refresh Token 迁移到 httpOnly Cookie 中，再配合 SameSite 和 CSRF Token 来防护
 
----
+**问题2**：多接口并发请求时如何避免失败 / 避免多次刷新？
 
-## 快速开始
+**回答**：当前项目是一个简化版 demo，还没有实现统一的请求拦截器队列机制。目前如果并发请求都带着过期的 accessToken，它们会各自失败。
 
-```bash
-pnpm install
-pnpm run dev
-```
+但在生产环境中，我会用 Axios 响应拦截器来统一处理。具体做法是：
 
-浏览器访问终端输出的本地地址（一般为 `http://localhost:5173`）。
+维护一个 isRefreshing 标志位和一个 pendingRequests 队列；
 
-生产构建与预览：
+第一个请求收到 401 后，发起刷新 Token 的请求，同时把 isRefreshing 设为 true；
 
-```bash
-pnpm run build    # tsc 类型检查 + vite build
-pnpm run preview  # 本地预览 dist
-pnpm run lint     # ESLint
-```
+后续并发的请求检测到 isRefreshing 为 true，就把它们自己的请求配置放入队列等待；
 
----
+刷新成功后，用新 Token 依次重试队列里的所有请求；
 
-## 路径别名
+如果刷新失败，则清空队列并跳转登录页。
 
-| 别名 | 指向 |
-|------|------|
-| `@/*` | `src/*` |
+这样既能避免多次调用刷新接口，也能保证并发请求不丢失
 
-示例：`import { fetchLeads } from '@/api/leadsApi'` 对应 `src/api/leadsApi.ts`。
+## 登录状态持久化与自动恢复
+**题目**：你提到“localStorage 存储 Token 实现会话持久化；应用启动时自动恢复登录状态”。请问：如果用户在 A 页面刷新浏览器（F5），或者关闭标签页后重新打开，前端如何判断用户是否仍然“已登录”？你会如何恢复用户的登录态，同时保证不会因为 localStorage 中残留的过期 Token 导致后续请求全部失败？
+**回答**：我们的登录状态恢复逻辑也在 auth-context.tsx 中。
 
-配置位置：`tsconfig.json` 的 `paths` 与 `vite.config.ts` 的 `resolve.alias`。
+用户登录成功后，我们会把 session、accessToken、refreshToken 分别存入 localStorage。浏览器刷新或重新打开时，AuthProvider 的 useEffect 会读取这些存储的值。
 
----
+如果 accessToken 不存在，直接标记为未登录。如果存在，就先调用 meApi 验证：
 
-## 目录结构
+验证成功 → 恢复用户状态；
 
-```text
-.
-├── index.html              # HTML 入口
-├── index.css               # 全局样式（含 Tailwind）
-├── public/                 # 静态资源
-├── vite.config.ts
-├── tsconfig.json
-└── src/
-    ├── main.tsx            # React 挂载根
-    ├── App.tsx             # 路由表、懒加载、Provider 包裹
-    ├── providers.tsx       # 全局 Provider（如 AuthProvider）
-    ├── types.ts            # 共享类型（如线索行 DataItem）
-    ├── api/
-    │   ├── authApi.ts      # Mock 认证接口
-    │   └── leadsApi.ts     # Mock 线索 CRUD + 内存 store
-    ├── context/
-    │   ├── auth-context.tsx
-    │   └── home-context.tsx
-    ├── hooks/
-    │   └── useDebouncedValue.ts
-    ├── routes/
-    │   └── guards.tsx      # RequireAuth、LoginRouteGuard
-    ├── components/         # UI 组件（Header、布局、列表、表格等）
-    │   ├── PageLoading.tsx
-    │   ├── layout/
-    │   ├── Header/
-    │   ├── Search/
-    │   ├── TableShow/
-    │   └── ShowMenu/
-    ├── pages/              # 路由页面
-    └── mock/               # Mock JSON（种子数据与详情字典）
-        ├── data.json
-        ├── options.json
-        ├── userDetails.json
-        └── companyDetails.json
-```
+验证失败（过期）→ 尝试用 refreshToken 刷新；
 
----
+刷新成功 → 再次获取用户信息并恢复；
 
-## 路由说明
+刷新失败 → 清空状态，回到未登录。
 
-| 路径 | 组件 | 是否需要登录 |
-|------|------|----------------|
-| `/login` | `LoginPage` | 否（已登录会重定向到 `/`） |
-| `/` | `HomePage` | 是 |
-| `/echarts` | `EchartsDashboardPage`（懒加载） | 是 |
-| `/users/:userId` | `UserDetailPage` | 是 |
-| `/companies/:companyName` | `CompanyPage` | 是 |
-| `*` | 重定向到 `/` | 视目标页而定 |
-
-受保护路由在 `src/routes/guards.tsx` 中通过 `RequireAuth` 实现；外壳布局为 `src/components/layout`（侧栏 + 顶栏 + `<Outlet />`）。
-
----
-
-## 认证（Mock）
-
-| 文件 | 职责 |
-|------|------|
-| `src/api/authApi.ts` | `loginApi`、`meApi`、`refreshApi`、`logoutApi` 及本地 Token 读写 |
-| `src/context/auth-context.tsx` | `AuthProvider`、`useAuth`，启动时 bootstrap 会话 |
-| `src/providers.tsx` | 在应用根部挂载 `AuthProvider` |
-
-启动流程简述：若有 access token 则调 `meApi`；失败且存在 refresh token 则尝试 `refreshApi` 后再拉用户信息；均失败则视为未登录。`isAuthReady` 用于避免恢复会话前误判跳转。
-
----
-
-## 线索数据与列表 / 图表联动
-
-1. **数据源**：`src/api/leadsApi.ts` 内模块级 `store`，由 `src/mock/data.json` 经 `buildInitialStore()` 扩充生成，并附带随机头像。
-2. **列表**：`src/components/Search/index.tsx` 调用 `fetchLeads`（模拟延迟 + `handleData` 筛选 + 分页）。
-3. **筛选**：`src/components/Search/handleData.ts`，维度含 `status`、`channel`、`owner`、`keyword`；值为「全部」时该维度不参与过滤。
-4. **写操作**：编辑备注、删除后重拉列表，并 `dispatchEvent('leads-changed')`。
-5. **图表**：`src/pages/EchartsDashboardPage.tsx` 监听 `leads-changed`，通过 `getLeadsSnapshot()` 取最新数据。
-
-首页筛选状态由 `src/context/home-context.tsx` 提供；关键字使用 `useDebouncedValue`（约 350ms）降低请求频率；列表分页大小见 `Search` 内常量。
-
----
-
-## 模块速查
-
-| 关注点 | 入口文件 |
-|--------|----------|
-| 路由与懒加载 | `src/App.tsx` |
-| 鉴权守卫 | `src/routes/guards.tsx` |
-| 全局加载占位 | `src/components/PageLoading.tsx` |
-| 首页拼装 | `src/pages/HomePage.tsx` |
-| 表格与弹窗 | `src/components/TableShow/` |
-
----
-
-## Mock 数据文件
-
-| 文件 | 用途 |
-|------|------|
-| `src/mock/data.json` | 线索种子，初始化内存 `store` |
-| `src/mock/options.json` | 筛选项配置 |
-| `src/mock/userDetails.json` | 用户详情页数据字典 |
-| `src/mock/companyDetails.json` | 企业详情页数据字典 |
-
----
-
-## 对接真实后端时的方向
-
-1. 将 `leadsApi` 中内存实现替换为 HTTP，分页与筛选参数与后端约定一致。
-2. 将 `authApi` 与 `auth-context` 中的存储字段、刷新策略与真实 Cookie / Header 方案对齐。
-3. 图表页若无法拉全量快照，可改为独立统计接口，并去掉对 `leads-changed` 的依赖或改为全局状态 / 查询缓存。
-
----
-
-## 推荐阅读顺序（读代码）
-
-1. `src/main.tsx` → `src/App.tsx` → `src/providers.tsx`  
-2. `src/routes/guards.tsx` → `src/context/auth-context.tsx` → `src/api/authApi.ts`  
-3. `src/pages/LoginPage.tsx`  
-4. `src/pages/HomePage.tsx` → `src/context/home-context.tsx`  
-5. `src/components/Search/index.tsx` → `src/api/leadsApi.ts`  
-6. `src/components/TableShow/index.tsx`  
-7. `src/pages/EchartsDashboardPage.tsx`  
-
----
-
-## 许可证
-
-本项目在 `package.json` 中标记为 `"private": true`。若需开源，请自行补充 License 文件并调整声明。
+这个设计保证了：页面 F5 后能无感知恢复登录；accessToken 过期但 refreshToken 有效时能自动续期；两个 Token 都过期时不会产生‘假登录’状态。

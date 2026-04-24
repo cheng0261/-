@@ -6,6 +6,7 @@ import { LoginPage } from '@/pages/LoginPage'
 
 export function RequireAuth({ children }: { children: ReactNode }) {
   const { isAuthenticated, isAuthReady } = useAuth()
+  console.log(isAuthenticated, isAuthReady)
   const location = useLocation()
 
   if (!isAuthReady) {

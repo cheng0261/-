@@ -19,6 +19,7 @@ export default function App() {
       <Providers>
         <Routes>
           <Route path="/login" element={<LoginRouteGuard />} />
+          {/* 鉴权 + 布局 */}
           <Route
             element={
               <RequireAuth>
@@ -27,6 +28,7 @@ export default function App() {
             }
           >
             <Route index element={<HomePage />} />
+            {/* 图表模块懒加载 */}
             <Route
               path="echarts"
               element={
